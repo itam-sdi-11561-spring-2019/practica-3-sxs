@@ -6,16 +6,16 @@ USE ieee.std_logic_unsigned.all;
 entity pract_3_spi is
 	port 
 	(
-		CLK 			: in 	 std_logic;
-		reset_n 		: in 	 std_logic;
-		I2C_SCLK 		: buffer std_logic;
-		I2C_SDAT 		: inout  std_logic;
+		CLK 		: in 	 std_logic;
+		reset_n 	: in 	 std_logic;
+		I2C_SCLK 	: buffer std_logic;
+		I2C_SDAT 	: inout  std_logic;
 		G_SENSOR_CS_N 	: buffer std_logic;
 		G_SENSOR_INT  	: in 	 std_logic;
-		btn_1 			: in 	 std_logic;
-		LEDS  			: out    std_logic_vector( 7 downto 0);
-		LEDS_OUT 		: out    std_logic_vector(15 downto 0);
-		dip_sw 	 		: in     std_logic_vector( 3 downto 0)
+		btn_1 		: in 	 std_logic;
+		LEDS  		: out    std_logic_vector( 7 downto 0);
+		LEDS_OUT 	: out    std_logic_vector(15 downto 0);
+		dip_sw 	 	: in     std_logic_vector( 3 downto 0)
 	);
 end pract_3_spi;
 
@@ -36,42 +36,43 @@ end component;
 component accel_rw 
 	port 
 	(
-		CLK 			: in     std_logic;
-		reset_n 		: in     std_logic;
-		I2C_SCLK 		: buffer std_logic;
-		I2C_SDAT 		: inout  std_logic;
+		CLK 		: in     std_logic;
+		reset_n 	: in     std_logic;
+		I2C_SCLK 	: buffer std_logic;
+		I2C_SDAT 	: inout  std_logic;
 		G_SENSOR_CS_N 	: buffer std_logic;
 		G_SENSOR_INT 	: in 	 std_logic;
 		read_signal 	: in 	 std_logic;
 		write_signal 	: in 	 std_logic;
-		CMD_IN 			: in 	 std_logic_vector( 7 downto 0);
-		TX_IN 			: in 	 std_logic_vector(15 downto 0);
-		RX_out 			: out 	 std_logic_vector(15 downto 0);
-		busy_out 		: out 	 std_logic
+		CMD_IN 		: in 	 std_logic_vector( 7 downto 0);
+		TX_IN 		: in 	 std_logic_vector(15 downto 0);
+		RX_out 		: out 	 std_logic_vector(15 downto 0);
+		busy_out 	: out 	 std_logic
 	);
 end component;
 
 TYPE   machine IS(INIT, IDLE, WR_PARAMS_SEND, WRITING,  RD_PARAMS_SEND, READING);
-SIGNAL state 			: machine;
+SIGNAL state 		: machine;
 
-signal cmd_buffer 		: std_logic_vector( 7 downto 0);
+signal cmd_buffer 	: std_logic_vector( 7 downto 0);
 signal tx_data_buffer 	: std_logic_vector(15 downto 0);
 signal rx_data_buffer 	: std_logic_vector(15 downto 0);
 
 signal next_wr_buffer 	: std_logic := '0';
-signal busy_buffer 		: std_logic := '0';
-signal read_accel_n	 	: std_logic := '1';
+signal busy_buffer 	: std_logic := '0';
+signal read_accel_n	: std_logic := '1';
 signal write_accel_n 	: std_logic := '1';
-signal init_done 		: std_logic := '0';
+signal init_done 	: std_logic := '0';
 signal val_init_reg 	: std_logic_vector(15 downto 0) := x"0000";
 
 signal cmd_init_buffer 	: std_logic_vector(7 downto 0);
-signal spi_busy 		: std_logic := '0';
+signal spi_busy 	: std_logic := '0';
 
-signal leds_buffer 		: std_logic_vector( 7 downto 0) := x"00";
+signal leds_buffer 	: std_logic_vector( 7 downto 0) := x"00";
 signal leds_out_buffer 	: std_logic_vector(15 downto 0) := x"0000";
 signal reg_to_check 	: std_logic_vector( 7 downto 0) := x"00";
 
+signal delay	 	: std_logic_vector(15 downto 0) := x"0000";
 
 begin
 
@@ -85,25 +86,25 @@ begin
 		reset_n 	=> reset_n,
 		next_wr 	=> next_wr_buffer,
 		regs_to_wr	=> busy_buffer,
-		cmd_to_reg  => cmd_init_buffer,
-		val_to_reg  => val_init_reg(15 downto 8)
+		cmd_to_reg	=> cmd_init_buffer,
+		val_to_reg	=> val_init_reg(15 downto 8)
 	);
 	
 	accel_rw_inst1 :accel_rw 
 	port map
 	(
-		CLK 			=> CLK,
-		reset_n 		=> reset_n,
-		I2C_SCLK 		=> I2C_SCLK,
-		I2C_SDAT 		=> I2C_SDAT,
+		CLK 		=> CLK,
+		reset_n 	=> reset_n,
+		I2C_SCLK 	=> I2C_SCLK,
+		I2C_SDAT 	=> I2C_SDAT,
 		G_SENSOR_CS_N 	=> G_SENSOR_CS_N,
 		G_SENSOR_INT 	=> G_SENSOR_INT,
 		read_signal 	=> read_accel_n,
 		write_signal 	=> write_accel_n,
-		CMD_IN 			=> cmd_buffer,
-		TX_IN 			=> tx_data_buffer,
-		RX_out 			=> rx_data_buffer,
-		busy_out 		=> spi_busy
+		CMD_IN 		=> cmd_buffer,
+		TX_IN 		=> tx_data_buffer,
+		RX_out 		=> rx_data_buffer,
+		busy_out 	=> spi_busy
 	);
 	
 	reg_to_check <= 
@@ -154,12 +155,14 @@ begin
 						next_wr_buffer <= '1';
 					else
 					
-						--if () then
+						if ( delay(15) = '1' ) then
 							next_wr_buffer <= '0';
 							tx_data_buffer <= x"0000";
-						
+							delay <= x"0000";
 							state <= RD_PARAMS_SEND;
-						--end if;
+						else 
+							delay <= delay + 1;
+						end if;
 					
 					end if;
 				WHEN WR_PARAMS_SEND =>
