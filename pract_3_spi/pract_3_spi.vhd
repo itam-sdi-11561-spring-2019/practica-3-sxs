@@ -55,8 +55,8 @@ TYPE   machine IS(INIT, IDLE, WR_PARAMS_SEND, WRITING,  RD_PARAMS_SEND, READING)
 SIGNAL state 		: machine;
 
 signal cmd_buffer 	: std_logic_vector( 7 downto 0);
-signal tx_data_buffer 	: std_logic_vector(15 downto 0);
-signal rx_data_buffer 	: std_logic_vector(15 downto 0);
+signal tx_data_buffer 	: std_logic_vector(7 downto 0);
+signal rx_data_buffer 	: std_logic_vector(7 downto 0);
 
 signal next_wr_buffer 	: std_logic := '0';
 signal busy_buffer 	: std_logic := '0';
