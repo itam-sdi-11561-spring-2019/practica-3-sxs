@@ -140,7 +140,7 @@ begin
 
 				WHEN INIT =>
 					leds_buffer <= x"00";
-					leds_out_buffer <= x"00";
+					--leds_out_buffer <= x"00";
 					cmd_buffer <= x"00";
 					tx_data_buffer <= x"00";
 					write_accel_n <= '1';
