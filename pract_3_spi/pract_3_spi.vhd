@@ -44,9 +44,9 @@ component accel_rw
 		G_SENSOR_INT 	: in 	 std_logic;
 		read_signal 	: in 	 std_logic;
 		write_signal 	: in 	 std_logic;
-		CMD_IN 		: in 	 std_logic_vector( 7 downto 0);
-		TX_IN 		: in 	 std_logic_vector(15 downto 0);
-		RX_out 		: out 	 std_logic_vector(15 downto 0);
+		CMD_IN 		: in 	 std_logic_vector(7 downto 0);
+		TX_IN 		: in 	 std_logic_vector(7 downto 0);
+		RX_out 		: out 	 std_logic_vector(7 downto 0);
 		busy_out 	: out 	 std_logic
 	);
 end component;
@@ -63,7 +63,7 @@ signal busy_buffer 	: std_logic := '0';
 signal read_accel_n	: std_logic := '1';
 signal write_accel_n 	: std_logic := '1';
 signal init_done 	: std_logic := '0';
-signal val_init_reg 	: std_logic_vector(15 downto 0) := x"0000";
+signal val_init_reg 	: std_logic_vector(7 downto 0) := x"00";
 
 signal cmd_init_buffer 	: std_logic_vector(7 downto 0);
 signal spi_busy 	: std_logic := '0';
@@ -87,7 +87,7 @@ begin
 		next_wr 	=> next_wr_buffer,
 		regs_to_wr	=> busy_buffer,
 		cmd_to_reg	=> cmd_init_buffer,
-		val_to_reg	=> val_init_reg(15 downto 8)
+		val_to_reg	=> val_init_reg
 	);
 	
 	accel_rw_inst1 :accel_rw 
@@ -140,9 +140,9 @@ begin
 
 				WHEN INIT =>
 					leds_buffer <= x"00";
-					leds_out_buffer <= x"0000";
+					leds_out_buffer <= x"00";
 					cmd_buffer <= x"00";
-					tx_data_buffer <= x"0000";
+					tx_data_buffer <= x"00";
 					write_accel_n <= '1';
 					read_accel_n <= '1';
 					init_done <= '0';
@@ -157,7 +157,7 @@ begin
 					
 						if ( delay(15) = '1' ) then
 							next_wr_buffer <= '0';
-							tx_data_buffer <= x"0000";
+							tx_data_buffer <= x"00";
 							delay <= x"0000";
 							state <= RD_PARAMS_SEND;
 						else 
@@ -203,8 +203,8 @@ begin
 					read_accel_n <= '1';
 					
 					if (spi_busy = '0') then
-						leds_out_buffer <= rx_data_buffer;
-						leds_buffer <= rx_data_buffer(15 downto 8);
+				--		leds_out_buffer <= rx_data_buffer;
+						leds_buffer <= rx_data_buffer;
 						state <= IDLE;
 					end if;
 				
