@@ -15,8 +15,8 @@ entity accel_rw is
 		read_signal : in std_logic;
 		write_signal : in std_logic;
 		CMD_IN : in std_logic_vector(7 downto 0);
-		TX_IN : in std_logic_vector(15 downto 0);
-		RX_out : out std_logic_vector(15 downto 0);
+		TX_IN : in std_logic_vector(7 downto 0);
+		RX_out : out std_logic_vector(7 downto 0);
 		busy_out : out std_logic
 	);
 end accel_rw ;
@@ -63,8 +63,8 @@ TYPE   machine IS(INIT, IDLE, WR_ST, RD_ST, RX, TX);
 signal state 			: machine;
 signal rw_buffer	 	: std_logic;
 signal cmd_buffer 		: std_logic_vector(7 downto 0);
-signal tx_data_buffer 	: std_logic_vector(15 downto 0);
-signal rx_data_buffer 	: std_logic_vector(15 downto 0);
+--signal tx_data_buffer 	: std_logic_vector(15 downto 0);
+--signal rx_data_buffer 	: std_logic_vector(15 downto 0);
 signal busy 			: std_logic;
 signal enable 			: std_logic;
 signal cont 			: integer := 0;
@@ -116,7 +116,7 @@ begin
 
         	WHEN INIT =>
 				rw_buffer <= '0';
-				tx_data_buffer <= x"0000";
+				--tx_data_buffer <= x"0000";
 				enable <= '0';
 				busy_out <= '0';
 				state <= IDLE;
