@@ -82,7 +82,7 @@ begin
 	GENERIC map(
     slaves    => 1,  --number of spi slaves
     cmd_width => 8,  --command bus width
-    d_width   => 16
+    d_width   => 8
 	 )
 	port map 
 	(
